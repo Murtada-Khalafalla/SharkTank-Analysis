@@ -1,0 +1,83 @@
+---
+title: "Shark Tank India Analysis"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+    theme: spacelab
+---
+
+```{r setup, include=FALSE, warning=FALSE, message=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(highcharter)
+```
+```{r read}
+shark <- read.csv("ShartankIndiaAllPitches.csv")
+```
+```{r}
+
+df_Shark <-  shark %>% 
+  select(Investment.Amount=Investment.Amount..In.Lakhs.INR.) %>% 
+  filter(Investment.Amount>0) %>% 
+  summarise(min_Invst=min(Investment.Amount), 
+          max_Invest=max(Investment.Amount), 
+          Avg_Invest=round(mean(Investment.Amount)))
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Min. Investment (in Crores)
+
+```{r}
+valueBox(df_Shark$min_Invst, icon = "fa-rupee-sign")
+```
+
+### Max. Investment (in Crores)
+
+```{r}
+valueBox(df_Shark$max_Invest, icon = "fa-rupee-sign")
+```
+
+### Avg. Investment (in Crores)
+
+```{r}
+valueBox(df_Shark$Avg_Invest, icon = "fa-rupee-sign")
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Distrbution of Investment Amount
+
+```{r}
+hchart(density(shark$Investment.Amount..In.Lakhs.INR.), type = "area", color = "#B71C1C", name = "Amount")
+
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Top Invesment Brand
+
+```{r}
+shark %>% 
+  group_by(Brand) %>% 
+  summarise(total_inv=sum(Investment.Amount..In.Lakhs.INR.)) %>% 
+  arrange(desc(total_inv)) %>% 
+  head(10) %>% 
+  hchart("column", hcaes(x = Brand, y = total_inv), color="#000000")
+```
+
+### Top Invesment Idea
+
+```{r}
+shark %>% 
+  group_by(Idea) %>% 
+  summarise(total_inv=sum(Investment.Amount..In.Lakhs.INR.)) %>% 
+  arrange(desc(total_inv)) %>% 
+  head(10) %>% 
+  hchart("column", hcaes(x = Idea, y = total_inv), color="#065535")
+```
+
